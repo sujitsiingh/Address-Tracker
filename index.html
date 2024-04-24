@@ -1,11 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AddressTracker</title>
-</head>
-<body>
-    
-</body>
+  </head>
+  <body>
+    <button class="geo-btn">Show user location</button>
+    <p class="showDetails">User Location Details</p>
+    <p class="fullAdd">User Address</p>
+    <p class="formatAdd">User Address</p>
+
+    <script>
+      const showDetails = document.querySelector('.showDetails');
+      const fullAdd = document.querySelector('.fullAdd');
+      const formatAdd = document.querySelector('.formatAdd');
+
+      let apiEndpoint = 'https://api.opencagedata.com/geocode/v1/json';
+      let apiKey = 'c4da33e7adae44b586a219da912771fb';
+
+      //api to get user address
+      const getUserCurrentAddress = async (latitude, longitude) => {
+        let query = `${latitude}, ${longitude}`;
+        let apiUrl = `${apiEndpoint}?q=${query}&key=${apiKey}&pretty=1`;
+
+        try {
+          const res = await fetch(apiUrl);
+          const data = await res.json();
+            // console.log(data);
+          //   fullAdd.textContent = data;
+          // const { results } = data;
+          if (data.results && data.results.length > 0) {
+            const { city, state, postcode, country } = data.results[0].components;
+            fullAdd.textContent = `User address: ${city}, ${postcode}, ${state}, ${country}`;
+            formatAdd.textContent = `User full address: ${data.results[0].formatted}`;
+          } else {
+            console.log('No results found');
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      };
+
+      document.querySelector('.geo-btn').addEventListener('click', () => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              const { latitude, longitude } = pos.coords;
+              showDetails.textContent = `Latitude: ${latitude} & Longitude: ${longitude}`;
+              getUserCurrentAddress(latitude, longitude);
+            },
+            (err) => {
+              showDetails.textContent = err.message;
+            }
+          );
+        }
+      });
+    </script>
+  </body>
 </html>
